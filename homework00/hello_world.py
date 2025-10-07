@@ -1,6 +1,6 @@
-"""
-Test
-"""
+"""Hello"""
+
+
 def text(message):
-    """Return"""
+    """Text"""
     return message
