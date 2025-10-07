@@ -1,7 +1,7 @@
-"""Hello"""
+"""hello"""
 
 
 def text():
-    """123"""
-    message = "Text"
+    """hello"""
+    message = "message"
     return message
