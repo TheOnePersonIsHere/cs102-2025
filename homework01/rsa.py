@@ -46,7 +46,25 @@ def multiplicative_inverse(e: int, phi: int) -> int:
     >>> multiplicative_inverse(7, 40)
     23
     """
-    # PUT YOUR CODE HERE
+
+    def extended_gcd(a: int, b: int) -> tuple:
+        if b == 0:
+            return a, 1, 0
+
+        gcd_val, x1, y1 = extended_gcd(b, a % b)
+
+        quotient = a // b
+        x = y1
+        y = x1 - quotient * y1
+
+        return gcd_val, x, y
+
+    gcd_val, x, _ = extended_gcd(e, phi)
+
+    if gcd_val != 1:
+        raise ValueError("Multiplicative inverse does not exist")
+
+    return x % phi
     pass
 
 
