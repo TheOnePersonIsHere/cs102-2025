@@ -15,5 +15,6 @@ def encrypt_growing_shift(plaintext: str, start: int = 1, delta: int = 1) -> str
             ciphertext += char
     return ciphertext
 
+
 result = encrypt_growing_shift("Пётон")
 print(result)
