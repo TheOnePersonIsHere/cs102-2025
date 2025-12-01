@@ -1,5 +1,6 @@
 import pathlib
 import typing as tp
+import random
 
 T = tp.TypeVar("T")
 
@@ -180,10 +181,35 @@ def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
     return None
 
 
+def is_valid_group(group: tp.List[str]) -> bool:
+    expected_set = {"1", "2", "3", "4", "5", "6", "7", "8", "9"}
+    actual_set = set(group)
+    return len(group) == 9 and actual_set == expected_set
+
+
 def check_solution(solution: tp.List[tp.List[str]]) -> bool:
     """ Если решение solution верно, то вернуть True, в противном случае False """
     # TODO: Add doctests with bad puzzles
-    pass
+    N = len(solution)
+
+    for r in range(N):
+        row = get_row(solution, (r, 0))
+        if not is_valid_group(row):
+            return False
+
+    for c in range(N):
+        col = get_col(solution, (0, c))
+        if not is_valid_group(col):
+            return False
+
+    block_size = int(N ** 0.5)
+    for r in range(0, N, block_size):
+        for c in range(0, N, block_size):
+            block = get_block(solution, (r, c))
+            if not is_valid_group(block):
+                return False
+
+    return True
 
 
 def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
@@ -207,7 +233,34 @@ def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
     >>> check_solution(solution)
     True
     """
-    pass
+    if N < 0: N = 0
+    if N > 81: N = 81
+
+    grid = [['.' for _ in range(9)] for _ in range(9)]
+
+    initial_values = list(find_possible_values(grid, (0, 0)))
+    if not initial_values:
+        return [['.' for _ in range(9)] for _ in range(9)]
+
+    random.shuffle(initial_values)
+    grid[0][0] = initial_values[0]
+
+    solved_grid = solve(grid)
+
+    if solved_grid is None:
+        return [['.' for _ in range(9)] for _ in range(9)]
+
+    cells_to_keep = N
+    all_positions = [(r, c) for r in range(9) for c in range(9)]
+    random.shuffle(all_positions)
+
+    puzzle_grid = [row[:] for row in solved_grid]
+
+    for i in range(cells_to_keep, 81):
+        r, c = all_positions[i]
+        puzzle_grid[r][c] = '.'
+
+    return puzzle_grid
 
 
 if __name__ == "__main__":
