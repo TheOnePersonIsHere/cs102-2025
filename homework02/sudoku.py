@@ -51,7 +51,6 @@ def group(values: tp.List[T], n: int) -> tp.List[tp.List[T]]:
         result.append(group)
 
     return result
-    pass
 
 
 def get_row(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str]:
@@ -63,7 +62,8 @@ def get_row(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str
     >>> get_row([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']], (2, 0))
     ['.', '8', '9']
     """
-    pass
+    row_idx, _ = pos
+    return grid[row_idx]
 
 
 def get_col(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str]:
@@ -75,7 +75,9 @@ def get_col(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str
     >>> get_col([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']], (0, 2))
     ['3', '6', '9']
     """
-    pass
+    _, col_idx = pos
+    column = [row[col_idx] for row in grid]
+    return column
 
 
 def get_block(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str]:
@@ -88,7 +90,19 @@ def get_block(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[s
     >>> get_block(grid, (8, 8))
     ['2', '8', '.', '.', '.', '5', '.', '7', '9']
     """
-    pass
+    row_idx, col_idx = pos
+
+    block_size = int(len(grid) ** 0.5)
+
+    start_row = (row_idx // block_size) * block_size
+    start_col = (col_idx // block_size) * block_size
+
+    block: tp.List[str] = []
+
+    for r in range(start_row, start_row + block_size):
+        for c in range(start_col, start_col + block_size):
+            block.append(grid[r][c])
+    return block
 
 
 def find_empty_positions(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.Tuple[int, int]]:
@@ -100,7 +114,12 @@ def find_empty_positions(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.Tuple[in
     >>> find_empty_positions([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']])
     (2, 0)
     """
-    pass
+    for r in range(len(grid)):
+        for c in range(len(grid[0])):
+            if grid[r][c] == '.':
+                return (r, c)
+    return None
+
 
 
 def find_possible_values(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.Set[str]:
@@ -113,7 +132,17 @@ def find_possible_values(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -
     >>> values == {'2', '5', '9'}
     True
     """
-    pass
+    all_values = {"1", "2", "3", "4", "5", "6", "7", "8", "9"}
+
+    row_values = set(get_row(grid, pos))
+    col_values = set(get_col(grid, pos))
+    block_values = set(get_block(grid, pos))
+
+    occupied_values = row_values.union(col_values).union(block_values)
+
+    possible_values = all_values - occupied_values
+
+    return possible_values
 
 
 def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
@@ -128,7 +157,27 @@ def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
     >>> solve(grid)
     [['5', '3', '4', '6', '7', '8', '9', '1', '2'], ['6', '7', '2', '1', '9', '5', '3', '4', '8'], ['1', '9', '8', '3', '4', '2', '5', '6', '7'], ['8', '5', '9', '7', '6', '1', '4', '2', '3'], ['4', '2', '6', '8', '5', '3', '7', '9', '1'], ['7', '1', '3', '9', '2', '4', '8', '5', '6'], ['9', '6', '1', '5', '3', '7', '2', '8', '4'], ['2', '8', '7', '4', '1', '9', '6', '3', '5'], ['3', '4', '5', '2', '8', '6', '1', '7', '9']]
     """
-    pass
+    pos = find_empty_positions(grid)
+
+    if pos is None:
+        return grid
+
+    row, col = pos
+
+    possible_values = find_possible_values(grid, pos)
+
+    for value in possible_values:
+
+        grid[row][col] = value
+
+        solution = solve(grid)
+
+        if solution is not None:
+            return solution
+
+        grid[row][col] = '.'
+
+    return None
 
 
 def check_solution(solution: tp.List[tp.List[str]]) -> bool:
