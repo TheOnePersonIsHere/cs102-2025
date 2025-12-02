@@ -41,8 +41,7 @@ def group(values: tp.List[T], n: int) -> tp.List[tp.List[T]]:
     if n <= 0:
         raise ValueError("Размер группы 'n' должен быть положительным числом.")
 
-
-    return [values[i:i + n] for i in range(0, len(values), n)]
+    return [values[i : i + n] for i in range(0, len(values), n)]
 
 
 def get_row(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str]:
