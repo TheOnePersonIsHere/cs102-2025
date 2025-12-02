@@ -41,13 +41,7 @@ def group(values: tp.List[T], n: int) -> tp.List[tp.List[T]]:
     if n <= 0:
         raise ValueError("Размер группы 'n' должен быть положительным числом.")
 
-    result: tp.List[tp.List[T]] = []
-
-    for i in range(0, len(values), n):
-        group = values[i : i + n]
-        result.append(group)
-
-    return result
+    return [values[i:i + n] for i in range(0, len(values), n)]
 
 
 def get_row(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str]:
@@ -73,8 +67,7 @@ def get_col(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str
     ['3', '6', '9']
     """
     _, col_idx = pos
-    column = [row[col_idx] for row in grid]
-    return column
+    return [row[col_idx] for row in grid]
 
 
 def get_block(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str]:
@@ -113,9 +106,9 @@ def find_empty_positions(
     >>> find_empty_positions([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']])
     (2, 0)
     """
-    for r in range(len(grid)):
-        for c in range(len(grid[0])):
-            if grid[r][c] == ".":
+    for r, row in enumerate(grid):
+        for c, value in enumerate(row):
+            if value == ".":
                 return (r, c)
     return None
 
@@ -170,7 +163,7 @@ def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
 
         solution = solve(grid)
 
-        if solution is not None:
+        if solution:
             return solution
 
         grid[row][col] = "."
@@ -230,10 +223,7 @@ def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
     >>> check_solution(solution)
     True
     """
-    if N < 0:
-        N = 0
-    if N > 81:
-        N = 81
+    N = max(0, min(N, 81))
 
     grid = [["." for _ in range(9)] for _ in range(9)]
 
@@ -246,7 +236,7 @@ def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
 
     solved_grid = solve(grid)
 
-    if solved_grid is None:
+    if not solved_grid:
         return [["." for _ in range(9)] for _ in range(9)]
 
     cells_to_keep = N
