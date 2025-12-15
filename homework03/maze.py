@@ -117,15 +117,53 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
 
 
 def solve_maze(
-    grid: List[List[Union[str, int]]],
-) -> Tuple[List[List[Union[str, int]]], Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]]:
-    """
+        grid: List[List[Union[str, int]]],
+) -> Tuple[List[List[Union[str, int]]],
+Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]]:
+    rows = len(grid)
+    cols = len(grid[0])
 
-    :param grid:
-    :return:
-    """
+    exits = []
+    for i in range(rows):
+        for j in range(cols):
+            if grid[i][j] == "X":
+                exits.append((i, j))
 
-    pass
+    if len(exits) == 1:
+        return grid, [exits[0]]
+
+    if len(exits) == 2:
+        for exit_coord in exits:
+            if encircled_exit(grid, exit_coord):
+                return grid, None
+
+        maze_copy = deepcopy(grid)
+
+        for i in range(rows):
+            for j in range(cols):
+                if maze_copy[i][j] == "X":
+                    maze_copy[i][j] = 1
+                elif maze_copy[i][j] == " ":
+                    maze_copy[i][j] = 0
+
+        exit1, exit2 = exits[0], exits[1]
+
+        k = 1
+        while maze_copy[exit2[0]][exit2[1]] == 0:
+            maze_copy = make_step(maze_copy, k)
+            k += 1
+
+            if k > rows * cols:
+                break
+
+        if maze_copy[exit2[0]][exit2[1]] == 0:
+            return grid, None
+
+        path = shortest_path(maze_copy, exit2)
+
+        return maze_copy, path
+
+    return grid, None
 
 
 def add_path_to_grid(
