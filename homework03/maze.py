@@ -13,23 +13,39 @@ def remove_wall(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) -> Li
     """
 
     :param grid:
-    :param path:
+    :param coord:
     :return:
     """
+    x, y = coord
+    grid[x][y] = " "
+
+    if x % 2 == 0:
+        if x - 1 >= 0 and (x - 1) % 2 == 1:
+            grid[x - 1][y] = " "
+        if x + 1 < len(grid) and (x + 1) % 2 == 1:
+            grid[x + 1][y] = " "
+    elif y % 2 == 0:
+        if y - 1 >= 0 and (y - 1) % 2 == 1:
+            grid[x][y - 1] = " "
+        if y + 1 < len(grid[0]) and (y + 1) % 2 == 1:
+            grid[x][y + 1] = " "
+
     return grid
 
 
 def bin_tree_maze(rows: int = 15, cols: int = 15, random_exit: bool = True) -> List[List[Union[str, int]]]:
     """
 
-    :param grid:
-    :param exit_coord:
+    :param rows:
+    :param cols:
+    :param random_exit:
     :return:
     """
-    grid: List[List[Union[str, int]]] = [[0 for _ in range(cols)] for _ in range(rows)]
+    grid = [["■" for _ in range(cols)] for _ in range(rows)]
     empty_cells = []
-    for x, row in enumerate(grid):
-        for y, _ in enumerate(row):
+
+    for x in range(rows):
+        for y in range(cols):
             if x % 2 == 1 and y % 2 == 1:
                 grid[x][y] = " "
                 empty_cells.append((x, y))
@@ -39,7 +55,6 @@ def bin_tree_maze(rows: int = 15, cols: int = 15, random_exit: bool = True) -> L
         right_possible = y + 2 < cols
 
         directions = []
-
         if up_possible:
             directions.append(("up", x - 2, y))
         if right_possible:
@@ -47,7 +62,6 @@ def bin_tree_maze(rows: int = 15, cols: int = 15, random_exit: bool = True) -> L
 
         if directions:
             direction, next_x, next_y = choice(directions)
-
             if direction == "up":
                 grid[x - 1][y] = " "
             elif direction == "right":
@@ -62,7 +76,6 @@ def bin_tree_maze(rows: int = 15, cols: int = 15, random_exit: bool = True) -> L
         x_out, y_out = rows - 1, 1
 
     grid[x_in][y_in], grid[x_out][y_out] = "X", "X"
-
     return grid
 
 
@@ -70,10 +83,14 @@ def get_exits(grid: List[List[Union[str, int]]]) -> List[Tuple[int, int]]:
     """
 
     :param grid:
-    :param exit_coord:
     :return:
     """
-    return []
+    exits = []
+    for i, row in enumerate(grid):
+        for j, cell in enumerate(row):
+            if cell == "X":
+                exits.append((i, j))
+    return exits
 
 
 def make_step(grid: List[List[Union[str, int]]], k: int) -> List[List[Union[str, int]]]:
@@ -100,17 +117,17 @@ def make_step(grid: List[List[Union[str, int]]], k: int) -> List[List[Union[str,
 
 
 def shortest_path(
-    grid: List[List[Union[str, int]]], exit_coord: Tuple[int, int]
+        grid: List[List[Union[str, int]]], exit_coord: Tuple[int, int]
 ) -> Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]:
     """
 
     :param grid:
-    :param k:
+    :param exit_coord:
     :return:
     """
     x, y = exit_coord
-
     cell_value = grid[x][y]
+
     if isinstance(cell_value, str):
         return None
 
@@ -141,7 +158,6 @@ def shortest_path(
 
     if k == 1:
         return path[::-1]
-
     return None
 
 
@@ -149,7 +165,7 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
     """
 
     :param grid:
-    :param k:
+    :param coord:
     :return:
     """
     x, y = coord
@@ -160,22 +176,16 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
         return False
 
     count_walls = 0
-
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
         nx, ny = x + dx, y + dy
         if 0 <= nx < rows and 0 <= ny < cols:
-            cell = grid[nx][ny]
-            if cell == 0 or cell == "0":
+            if grid[nx][ny] == "■":
                 count_walls += 1
         else:
             count_walls += 1
 
-    if (
-        (x == 0 and y == 0)
-        or (x == 0 and y == cols - 1)
-        or (x == rows - 1 and y == 0)
-        or (x == rows - 1 and y == cols - 1)
-    ):
+    if (x == 0 and y == 0) or (x == 0 and y == cols - 1) or \
+            (x == rows - 1 and y == 0) or (x == rows - 1 and y == cols - 1):
         return count_walls >= 2
 
     if x == 0 or x == rows - 1 or y == 0 or y == cols - 1:
@@ -185,22 +195,16 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
 
 
 def solve_maze(
-    grid: List[List[Union[str, int]]],
+        grid: List[List[Union[str, int]]],
 ) -> Tuple[List[List[Union[str, int]]], Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]]:
     """
 
     :param grid:
-    :param k:
     :return:
     """
     rows = len(grid)
     cols = len(grid[0])
-
-    exits = []
-    for i in range(rows):
-        for j in range(cols):
-            if grid[i][j] == "X":
-                exits.append((i, j))
+    exits = get_exits(grid)
 
     if len(exits) == 1:
         return grid, [exits[0]]
@@ -211,21 +215,20 @@ def solve_maze(
                 return grid, None
 
         maze_copy = deepcopy(grid)
-
         for i in range(rows):
             for j in range(cols):
                 if maze_copy[i][j] == "X":
                     maze_copy[i][j] = 1
                 elif maze_copy[i][j] == " ":
                     maze_copy[i][j] = 0
+                elif maze_copy[i][j] == "■":
+                    maze_copy[i][j] = 0
 
         exit1, exit2 = exits[0], exits[1]
-
         k = 1
         while maze_copy[exit2[0]][exit2[1]] == 0:
             maze_copy = make_step(maze_copy, k)
             k += 1
-
             if k > rows * cols:
                 break
 
@@ -234,20 +237,19 @@ def solve_maze(
             return grid, None
 
         path = shortest_path(maze_copy, exit2)
-
         return maze_copy, path
 
     return grid, None
 
 
 def add_path_to_grid(
-    grid: List[List[Union[str, int]]],
-    path: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]],
+        grid: List[List[Union[str, int]]],
+        path: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]],
 ) -> List[List[Union[str, int]]]:
     """
 
     :param grid:
-    :param k:
+    :param path:
     :return:
     """
     if path:
