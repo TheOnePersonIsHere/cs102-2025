@@ -9,7 +9,9 @@ def create_grid(rows: int = 15, cols: int = 15) -> List[List[Union[str, int]]]:
     return [["■"] * cols for _ in range(rows)]
 
 
-def remove_wall(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) -> List[List[Union[str, int]]]:
+def remove_wall(
+    grid: List[List[Union[str, int]]], coord: Tuple[int, int]
+) -> List[List[Union[str, int]]]:
     """
 
     :param grid:
@@ -103,7 +105,9 @@ def make_step(grid: List[List[Union[str, int]]], k: int) -> List[List[Union[str,
     return grid
 
 
-def shortest_path(grid: List[List[Union[str, int]]], exit_coord: Tuple[int, int]) -> Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]:
+def shortest_path(
+    grid: List[List[Union[str, int]]], exit_coord: Tuple[int, int]
+) -> Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]:
     """
 
     :param grid:
@@ -180,7 +184,11 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
     return count_walls >= 2
 
 
-def solve_maze(grid: List[List[Union[str, int]]],) -> Tuple[List[List[Union[str, int]]], Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]]:
+def solve_maze(
+    grid: List[List[Union[str, int]]],
+) -> Tuple[
+    List[List[Union[str, int]]], Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]
+]:
     """
 
     :param grid:
@@ -233,7 +241,10 @@ def solve_maze(grid: List[List[Union[str, int]]],) -> Tuple[List[List[Union[str,
     return grid, None
 
 
-def add_path_to_grid(grid: List[List[Union[str, int]]],path: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]],) -> List[List[Union[str, int]]]:
+def add_path_to_grid(
+    grid: List[List[Union[str, int]]],
+    path: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]],
+) -> List[List[Union[str, int]]]:
     """
 
     :param grid:
