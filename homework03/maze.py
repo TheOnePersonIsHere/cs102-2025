@@ -117,7 +117,7 @@ def make_step(grid: List[List[Union[str, int]]], k: int) -> List[List[Union[str,
 
 
 def shortest_path(
-        grid: List[List[Union[str, int]]], exit_coord: Tuple[int, int]
+    grid: List[List[Union[str, int]]], exit_coord: Tuple[int, int]
 ) -> Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]:
     """
 
@@ -184,8 +184,12 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
         else:
             count_walls += 1
 
-    if (x == 0 and y == 0) or (x == 0 and y == cols - 1) or \
-            (x == rows - 1 and y == 0) or (x == rows - 1 and y == cols - 1):
+    if (
+        (x == 0 and y == 0)
+        or (x == 0 and y == cols - 1)
+        or (x == rows - 1 and y == 0)
+        or (x == rows - 1 and y == cols - 1)
+    ):
         return count_walls >= 2
 
     if x == 0 or x == rows - 1 or y == 0 or y == cols - 1:
@@ -195,7 +199,7 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
 
 
 def solve_maze(
-        grid: List[List[Union[str, int]]],
+    grid: List[List[Union[str, int]]],
 ) -> Tuple[List[List[Union[str, int]]], Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]]:
     """
 
@@ -243,8 +247,8 @@ def solve_maze(
 
 
 def add_path_to_grid(
-        grid: List[List[Union[str, int]]],
-        path: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]],
+    grid: List[List[Union[str, int]]],
+    path: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]],
 ) -> List[List[Union[str, int]]]:
     """
 
@@ -267,3 +271,4 @@ if __name__ == "__main__":
     _, PATH = solve_maze(GRID)
     MAZE = add_path_to_grid(GRID, PATH)
     print(pd.DataFrame(MAZE))
+    
