@@ -2,14 +2,14 @@ from copy import deepcopy
 from random import choice, randint
 from typing import List, Optional, Tuple, Union
 
-import pandas as pd
-
 
 def create_grid(rows: int = 15, cols: int = 15) -> List[List[Union[str, int]]]:
     return [["■"] * cols for _ in range(rows)]
 
 
-def remove_wall(grid, coord):
+def remove_wall(
+    grid: List[List[Union[str, int]]], coord: Tuple[int, int]
+) -> List[List[Union[str, int]]]:
     """
 
     :param grid:
@@ -17,49 +17,74 @@ def remove_wall(grid, coord):
     :return:
     """
     x, y = coord
+    rows = len(grid)
+    cols = len(grid[0])
+
     grid[x][y] = " "
 
-    if x % 2 == 0 and x - 1 >= 0:
+    direction = randint(0, 1)  # 0 – вверх, 1 – вправо
+    if direction == 0 and x > 1:
         grid[x - 1][y] = " "
-    elif y % 2 == 0 and y - 1 >= 0:
-        grid[x][y - 1] = " "
+    elif y < cols - 2:
+        grid[x][y + 1] = " "
+    elif x > 1:
+        grid[x - 1][y] = " "
 
     return grid
 
 
-def bin_tree_maze(rows: int = 15, cols: int = 15, random_exit: bool = True) -> List[List[Union[str, int]]]:
+def bin_tree_maze(
+    rows: int = 15, cols: int = 15, random_exit: bool = True
+) -> List[List[Union[str, int]]]:
     """
     :param rows:
     :param cols:
     :param random_exit:
     :return:
     """
-    grid: List[List[Union[str, int]]] = [["■" for _ in range(cols)] for _ in range(rows)]
+    grid: List[List[Union[str, int]]] = create_grid(rows, cols)
 
+    empty_cells: List[Tuple[int, int]] = []
     for x in range(1, rows, 2):
         for y in range(1, cols, 2):
             grid[x][y] = " "
+            empty_cells.append((x, y))
 
-            up_possible = x > 1
-            right_possible = y < cols - 2
-
-            if up_possible:
-                grid[x - 1][y] = " "
-            elif right_possible:
-                grid[x][y + 1] = " "
+    for coord in empty_cells:
+        grid = remove_wall(grid, coord)
 
     if random_exit:
-        x1 = randint(0, rows - 1)
-        y1 = choice([0, cols - 1]) if x1 not in (0, rows - 1) else randint(0, cols - 1)
+        exits: List[Tuple[int, int]] = []
+        while len(exits) < 2:
+            side = randint(0, 3)
+            if side == 0:
+                candidate = (0, randint(0, cols - 1))
+            elif side == 1:
+                candidate = (rows - 1, randint(0, cols - 1))
+            elif side == 2:
+                candidate = (randint(0, rows - 1), 0)
+            else:
+                candidate = (randint(0, rows - 1), cols - 1)
 
-        x2 = randint(0, rows - 1)
-        y2 = choice([0, cols - 1]) if x2 not in (0, rows - 1) else randint(0, cols - 1)
+            x, y = candidate
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < rows and 0 <= ny < cols and grid[nx][ny] == " ":
+                    exits.append(candidate)
+                    grid[x][y] = "X"
+                    break
+            exits = list(dict.fromkeys(exits))
+            if rows == 1 and cols == 1:
+                break
+            if rows == 1 or cols == 1:
+                if len(exits) == 1:
+                    break
     else:
-        x1, y1 = 0, cols - 2
-        x2, y2 = rows - 1, 1
+        grid[0][cols - 2] = "X"
+        grid[rows - 1][1] = "X"
 
-    grid[x1][y1] = "X"
-    grid[x2][y2] = "X"
+    if not random_exit and rows == 1 and cols == 1:
+        grid[0][0] = "X"
 
     return grid
 
@@ -156,31 +181,29 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
     rows = len(grid)
     cols = len(grid[0])
 
-    if grid[x][y] != "X":
+    if not (x == 0 or x == rows - 1 or y == 0 or y == cols - 1):
         return False
 
     walls = 0
-
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
         nx, ny = x + dx, y + dy
-
         if nx < 0 or nx >= rows or ny < 0 or ny >= cols:
             walls += 1
         elif grid[nx][ny] == "■":
             walls += 1
 
-    if (x, y) in [(0, 0), (0, cols - 1), (rows - 1, 0), (rows - 1, cols - 1)]:
+    is_corner = (x in (0, rows - 1)) and (y in (0, cols - 1))
+    if is_corner:
         return walls == 2
 
-    if x == 0 or x == rows - 1 or y == 0 or y == cols - 1:
-        return walls == 3
-
-    return False
+    return walls == 3
 
 
 def solve_maze(
     grid: List[List[Union[str, int]]],
-) -> Tuple[List[List[Union[str, int]]], Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]]:
+) -> Tuple[
+    List[List[Union[str, int]]], Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]
+]:
     """
 
     :param grid:
@@ -190,6 +213,9 @@ def solve_maze(
     cols = len(grid[0])
     exits = get_exits(grid)
 
+    if len(exits) == 0:
+        return grid, None
+
     if len(exits) == 1:
         return grid, [exits[0]]
 
@@ -198,29 +224,32 @@ def solve_maze(
             if encircled_exit(grid, exit_coord):
                 return grid, None
 
+        start = exits[0]
+        finish = exits[1]
+
         maze_copy = deepcopy(grid)
         for i in range(rows):
             for j in range(cols):
-                if maze_copy[i][j] == "X":
+                if (i, j) == start:
                     maze_copy[i][j] = 1
+                elif maze_copy[i][j] == "X":
+                    maze_copy[i][j] = 0
                 elif maze_copy[i][j] == " ":
                     maze_copy[i][j] = 0
                 elif maze_copy[i][j] == "■":
                     maze_copy[i][j] = -1
-
-        exit1, exit2 = exits[0], exits[1]
         k = 1
-        while maze_copy[exit2[0]][exit2[1]] == 0:
+        while maze_copy[finish[0]][finish[1]] == 0:
             maze_copy = make_step(maze_copy, k)
             k += 1
             if k > rows * cols:
                 break
 
-        exit2_value = maze_copy[exit2[0]][exit2[1]]
-        if isinstance(exit2_value, int) and exit2_value == 0:
+        exit_value = maze_copy[finish[0]][finish[1]]
+        if isinstance(exit_value, int) and exit_value == 0:
             return grid, None
 
-        path = shortest_path(maze_copy, exit2)
+        path = shortest_path(maze_copy, finish)
         return maze_copy, path
 
     return grid, None
@@ -245,9 +274,10 @@ def add_path_to_grid(
 
 
 if __name__ == "__main__":
-    print(pd.DataFrame(bin_tree_maze(15, 15)))
+    import pandas as pd
+
     GRID = bin_tree_maze(15, 15)
     print(pd.DataFrame(GRID))
-    _, PATH = solve_maze(GRID)
-    MAZE = add_path_to_grid(GRID, PATH)
+    MAZE, PATH = solve_maze(GRID)
+    MAZE = add_path_to_grid(MAZE, PATH)
     print(pd.DataFrame(MAZE))
