@@ -41,7 +41,7 @@ def bin_tree_maze(rows: int = 15, cols: int = 15, random_exit: bool = True) -> L
     :param random_exit:
     :return:
     """
-    grid = [["■" for _ in range(cols)] for _ in range(rows)]
+    grid: List[List[Union[str, int]]] = [["■" for _ in range(cols)] for _ in range(rows)]
     empty_cells = []
 
     for x in range(rows):
