@@ -9,7 +9,7 @@ def create_grid(rows: int = 15, cols: int = 15) -> List[List[Union[str, int]]]:
     return [["■"] * cols for _ in range(rows)]
 
 
-def remove_wall(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) -> List[List[Union[str, int]]]:
+def remove_wall(grid, coord):
     """
 
     :param grid:
@@ -19,63 +19,48 @@ def remove_wall(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) -> Li
     x, y = coord
     grid[x][y] = " "
 
-    if x % 2 == 0:
-        if x - 1 >= 0 and (x - 1) % 2 == 1:
-            grid[x - 1][y] = " "
-        if x + 1 < len(grid) and (x + 1) % 2 == 1:
-            grid[x + 1][y] = " "
-    elif y % 2 == 0:
-        if y - 1 >= 0 and (y - 1) % 2 == 1:
-            grid[x][y - 1] = " "
-        if y + 1 < len(grid[0]) and (y + 1) % 2 == 1:
-            grid[x][y + 1] = " "
+    if x % 2 == 0 and x - 1 >= 0:
+        grid[x - 1][y] = " "
+    elif y % 2 == 0 and y - 1 >= 0:
+        grid[x][y - 1] = " "
 
     return grid
 
 
 def bin_tree_maze(rows: int = 15, cols: int = 15, random_exit: bool = True) -> List[List[Union[str, int]]]:
     """
-
     :param rows:
     :param cols:
     :param random_exit:
     :return:
     """
     grid: List[List[Union[str, int]]] = [["■" for _ in range(cols)] for _ in range(rows)]
-    empty_cells = []
 
-    for x in range(rows):
-        for y in range(cols):
-            if x % 2 == 1 and y % 2 == 1:
-                grid[x][y] = " "
-                empty_cells.append((x, y))
+    for x in range(1, rows, 2):
+        for y in range(1, cols, 2):
+            grid[x][y] = " "
 
-    for x, y in empty_cells:
-        up_possible = x - 2 >= 0
-        right_possible = y + 2 < cols
+            up_possible = x > 1
+            right_possible = y < cols - 2
 
-        directions = []
-        if up_possible:
-            directions.append(("up", x - 2, y))
-        if right_possible:
-            directions.append(("right", x, y + 2))
-
-        if directions:
-            direction, next_x, next_y = choice(directions)
-            if direction == "up":
+            if up_possible:
                 grid[x - 1][y] = " "
-            elif direction == "right":
+            elif right_possible:
                 grid[x][y + 1] = " "
 
     if random_exit:
-        x_in, x_out = randint(0, rows - 1), randint(0, rows - 1)
-        y_in = randint(0, cols - 1) if x_in in (0, rows - 1) else choice((0, cols - 1))
-        y_out = randint(0, cols - 1) if x_out in (0, rows - 1) else choice((0, cols - 1))
-    else:
-        x_in, y_in = 0, cols - 2
-        x_out, y_out = rows - 1, 1
+        x1 = randint(0, rows - 1)
+        y1 = choice([0, cols - 1]) if x1 not in (0, rows - 1) else randint(0, cols - 1)
 
-    grid[x_in][y_in], grid[x_out][y_out] = "X", "X"
+        x2 = randint(0, rows - 1)
+        y2 = choice([0, cols - 1]) if x2 not in (0, rows - 1) else randint(0, cols - 1)
+    else:
+        x1, y1 = 0, cols - 2
+        x2, y2 = rows - 1, 1
+
+    grid[x1][y1] = "X"
+    grid[x2][y2] = "X"
+
     return grid
 
 
@@ -157,13 +142,12 @@ def shortest_path(
             break
 
     if k == 1:
-        return path[::-1]
+        return path
     return None
 
 
 def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) -> bool:
     """
-
     :param grid:
     :param coord:
     :return:
@@ -175,27 +159,23 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
     if grid[x][y] != "X":
         return False
 
-    count_walls = 0
+    walls = 0
+
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
         nx, ny = x + dx, y + dy
-        if 0 <= nx < rows and 0 <= ny < cols:
-            if grid[nx][ny] == "■":
-                count_walls += 1
-        else:
-            count_walls += 1
 
-    if (
-        (x == 0 and y == 0)
-        or (x == 0 and y == cols - 1)
-        or (x == rows - 1 and y == 0)
-        or (x == rows - 1 and y == cols - 1)
-    ):
-        return count_walls >= 2
+        if nx < 0 or nx >= rows or ny < 0 or ny >= cols:
+            walls += 1
+        elif grid[nx][ny] == "■":
+            walls += 1
+
+    if (x, y) in [(0, 0), (0, cols - 1), (rows - 1, 0), (rows - 1, cols - 1)]:
+        return walls == 2
 
     if x == 0 or x == rows - 1 or y == 0 or y == cols - 1:
-        return count_walls >= 3
+        return walls == 3
 
-    return count_walls >= 2
+    return False
 
 
 def solve_maze(
@@ -226,7 +206,7 @@ def solve_maze(
                 elif maze_copy[i][j] == " ":
                     maze_copy[i][j] = 0
                 elif maze_copy[i][j] == "■":
-                    maze_copy[i][j] = 0
+                    maze_copy[i][j] = -1
 
         exit1, exit2 = exits[0], exits[1]
         k = 1
