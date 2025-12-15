@@ -346,6 +346,10 @@ def add_path_to_grid(
     :return:
     """
     if path:
+        if isinstance(path, tuple):
+            path_list = [path]
+        else:
+            path_list = path
         for i, row in enumerate(grid):
             for j, _ in enumerate(row):
                 if (i, j) in path:
