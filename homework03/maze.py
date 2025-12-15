@@ -23,17 +23,16 @@ def remove_wall(
 
 
 def bin_tree_maze(
-    rows: int = 15, cols: int = 15, random_exit: bool = True
+        rows: int = 15, cols: int = 15, random_exit: bool = True
 ) -> List[List[Union[str, int]]]:
     """
-
     :param rows:
     :param cols:
     :param random_exit:
     :return:
     """
 
-    grid = create_grid(rows, cols)
+    grid = [[0 for _ in range(cols)] for _ in range(rows)]
     empty_cells = []
     for x, row in enumerate(grid):
         for y, _ in enumerate(row):
@@ -41,14 +40,25 @@ def bin_tree_maze(
                 grid[x][y] = " "
                 empty_cells.append((x, y))
 
-    # 1. выбрать любую клетку
-    # 2. выбрать направление: наверх или направо.
-    # Если в выбранном направлении следующая клетка лежит за границами поля,
-    # выбрать второе возможное направление
-    # 3. перейти в следующую клетку, сносим между клетками стену
-    # 4. повторять 2-3 до тех пор, пока не будут пройдены все клетки
+    for x, y in empty_cells:
+        up_possible = x - 2 >= 0
+        right_possible = y + 2 < cols
 
-    # генерация входа и выхода
+        directions = []
+
+        if up_possible:
+            directions.append(('up', x - 2, y))
+        if right_possible:
+            directions.append(('right', x, y + 2))
+
+        if directions:
+            direction, next_x, next_y = choice(directions)
+
+            if direction == 'up':
+                grid[x - 1][y] = " "
+            elif direction == 'right':
+                grid[x][y + 1] = " "
+
     if random_exit:
         x_in, x_out = randint(0, rows - 1), randint(0, rows - 1)
         y_in = randint(0, cols - 1) if x_in in (0, rows - 1) else choice((0, cols - 1))
