@@ -358,8 +358,7 @@ if __name__ == "__main__":
 
     GRID = bin_tree_maze(15, 15)
     print(pd.DataFrame(GRID))
+    PATH: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]
     MAZE, PATH = solve_maze(GRID)
-    if PATH is not None:
-        MAZE = add_path_to_grid(MAZE, PATH)
     MAZE = add_path_to_grid(MAZE, PATH)
     print(pd.DataFrame(MAZE))
