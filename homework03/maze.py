@@ -325,7 +325,11 @@ def solve_maze(
         if isinstance(exit_value, int) and exit_value == 0:
             return grid, None
 
-        path = shortest_path(maze_copy, finish)
+        path_result = shortest_path(maze_copy, finish)
+        if isinstance(path_result, tuple):
+            path = [path_result]
+        else:
+            path = path_result
         return maze_copy, path
 
     return grid, None
