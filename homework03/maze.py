@@ -89,8 +89,18 @@ def make_step(grid: List[List[Union[str, int]]], k: int) -> List[List[Union[str,
     :param k:
     :return:
     """
+    rows = len(grid)
+    cols = len(grid[0])
 
-    pass
+    for x in range(rows):
+        for y in range(cols):
+            if grid[x][y] == k:
+                for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < rows and 0 <= ny < cols:
+                        if grid[nx][ny] == 0:
+                            grid[nx][ny] = k + 1
+    return grid
 
 
 def shortest_path(
@@ -102,7 +112,36 @@ def shortest_path(
     :param exit_coord:
     :return:
     """
-    pass
+    x, y = exit_coord
+
+    if grid[x][y] == 1:
+        return [(x, y)]
+
+    if grid[x][y] == 0:
+        return None
+
+    path = [(x, y)]
+    k = grid[x][y]
+
+    while k > 1:
+        found = False
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < len(grid) and 0 <= ny < len(grid[0]):
+                if grid[nx][ny] == k - 1:
+                    path.append((nx, ny))
+                    x, y = nx, ny
+                    k -= 1
+                    found = True
+                    break
+
+        if not found:
+            break
+
+    if k == 1:
+        return path[::-1]
+
+    return None
 
 
 def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) -> bool:
@@ -112,14 +151,43 @@ def encircled_exit(grid: List[List[Union[str, int]]], coord: Tuple[int, int]) ->
     :param coord:
     :return:
     """
+    x, y = coord
+    rows = len(grid)
+    cols = len(grid[0])
 
-    pass
+    if grid[x][y] != "X":
+        return False
+
+    count_walls = 0
+
+    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < rows and 0 <= ny < cols:
+            if grid[nx][ny] in (0, "█"):
+                count_walls += 1
+        else:
+            count_walls += 1
+
+    if (x == 0 and y == 0) or (x == 0 and y == cols - 1) or \
+            (x == rows - 1 and y == 0) or (x == rows - 1 and y == cols - 1):
+        return count_walls >= 2
+
+    if x == 0 or x == rows - 1 or y == 0 or y == cols - 1:
+        return count_walls >= 3
+
+    return count_walls >= 2
 
 
 def solve_maze(
         grid: List[List[Union[str, int]]],
 ) -> Tuple[List[List[Union[str, int]]],
 Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]]:
+    """
+
+    :param grid:
+    :return:
+    """
+    
     rows = len(grid)
     cols = len(grid[0])
 
