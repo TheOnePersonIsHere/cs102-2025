@@ -122,7 +122,17 @@ class GameOfLife:
         out : Cells
             Список соседних клеток.
         """
-        pass
+        neighbours = []
+        row, col = cell
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                if dy == 0 and dx == 0:
+                    continue
+                y = row + dy
+                x = col + dx
+                if 0 <= y < self.cell_height and 0 <= x < self.cell_width:
+                    neighbours.append(self.grid[y][x])
+        return neighbours
 
     def get_next_generation(self) -> Grid:
         """
@@ -133,4 +143,17 @@ class GameOfLife:
         out : Grid
             Новое поколение клеток.
         """
-        pass
+        new_grid = []
+        for y in range(self.cell_height):
+            new_row = []
+            for x in range(self.cell_width):
+                neighbours = self.get_neighbours((y, x))
+                alive = self.grid[y][x] == 1
+                if alive and (2 <= sum(neighbours) <= 3):
+                    new_row.append(1)
+                elif not alive and sum(neighbours) == 3:
+                    new_row.append(1)
+                else:
+                    new_row.append(0)
+            new_grid.append(new_row)
+        return new_grid
