@@ -188,7 +188,7 @@ def make_step(grid: List[List[Union[str, int]]], k: int) -> List[List[Union[str,
 
 def shortest_path(
     grid: List[List[Union[str, int]]], exit_coord: Tuple[int, int]
-) -> Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]:
+) -> Optional[List[Tuple[int, int]]]:
     """
 
     :param grid:
@@ -326,11 +326,9 @@ def solve_maze(
             return grid, None
 
         path_result = shortest_path(maze_copy, finish)
-        if isinstance(path_result, tuple):
-            path = [path_result]
-        else:
-            path = path_result
-        return maze_copy, path
+        if path_result is None:
+            return maze_copy, None
+        return maze_copy, path_result
 
     return grid, None
 
