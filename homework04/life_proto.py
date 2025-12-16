@@ -77,15 +77,14 @@ class GameOfLife:
         out : Grid
             Матрица клеток размером `cell_height` х `cell_width`.
         """
-        grid: Grid = []
+        grid = []
         for _ in range(self.cell_height):
-            row: Cells = []
+            row = []
             for _ in range(self.cell_width):
                 if randomize:
-                    cell = random.randint(0, 1)
+                    row.append(random.randint(0, 1))
                 else:
-                    cell = 0
-                row.append(cell)
+                    row.append(0)
             grid.append(row)
         return grid
 
@@ -93,11 +92,17 @@ class GameOfLife:
         """
         Отрисовка списка клеток с закрашиванием их в соответствующе цвета.
         """
-        for y, row in enumerate(self.grid):
-            for x, cell in enumerate(row):
-                color = pygame.Color("green") if cell == 1 else pygame.Color("white")
-                rect = (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-                pygame.draw.rect(self.screen, color, rect)
+        for y in range(len(self.grid)):
+            for x in range(len(self.grid[y])):
+                if self.grid[y][x] == 1:
+                    color = pygame.Color("green")
+                else:
+                    color = pygame.Color("white")
+                pygame.draw.rect(
+                    self.screen,
+                    color,
+                    (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size),
+                )
 
     def get_neighbours(self, cell: Cell) -> Cells:
         """
