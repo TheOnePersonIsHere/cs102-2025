@@ -79,7 +79,17 @@ class GameOfLife:
         out : Grid
             Матрица клеток размером `cell_height` х `cell_width`.
         """
-        pass
+        grid: Grid = []
+        for _ in range(self.cell_height):
+            row: Cells = []
+            for _ in range(self.cell_width):
+                if randomize:
+                    cell = random.randint(0, 1)
+                else:
+                    cell = 0
+                row.append(cell)
+            grid.append(row)
+        return grid
 
     def draw_grid(self) -> None:
         """
