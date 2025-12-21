@@ -37,5 +37,6 @@ class Console(UI):
             curses.napms(200)
 
             key = screen.getch()
-            if key == ord('q'):
+            if key == ord("q"):
                 break
+            
