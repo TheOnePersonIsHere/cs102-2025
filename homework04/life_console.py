@@ -39,4 +39,3 @@ class Console(UI):
             key = screen.getch()
             if key == ord("q"):
                 break
-            
